@@ -6,7 +6,7 @@ This is very basic for a beginner Android developer. It just simply making HTTP 
 
 # Prerequisites
 * Published with Android Studio 2.3.1
-* Get your API key from [here] (www.themoviedb.org)
+* Get your API key from [MovieDb] (https://developers.themoviedb.org/3/getting-started)
 * Insert API key [here] (https://github.com/iamzeus4u/MoviesGuide/blob/master/app/src/main/java/xyz/jc/zeus/moviesguide/utilities/NetworkUtils.java) @ line 40
 
 # Author
