@@ -21,8 +21,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.HttpURLConnection;
-
 /**
  * Utility functions to handle MoviesDb JSON data.
  */
@@ -36,6 +34,35 @@ public final class MovieDBJsonUtils {
      *
      * @throws JSONException If JSON data cannot be properly parsed
      */
+    public static String getMoviesErrorStringsFromJson(Context context, String moviesJsonStr)
+            throws JSONException {
+        final String OWM_MESSAGE_CODE = "status_code";
+        final String OWM_MESSAGE = "status_message";
+        String statusMsg = null;
+
+        JSONObject moviesJson = new JSONObject(moviesJsonStr);
+
+        if (moviesJson.has(OWM_MESSAGE_CODE)) {
+
+            int msgCode = moviesJson.getInt(OWM_MESSAGE_CODE);
+
+            switch (msgCode) {
+                case 7: //401 "status_message": "Invalid API key: You must be granted a valid key.",
+                    statusMsg = moviesJson.getString(OWM_MESSAGE);
+                    break;
+
+                case 34://404 "status_message": "The resource you requested could not be found.",
+                    return null;
+
+                default:
+                    /* Server probably down */
+                    return null;
+            }
+        }
+
+        return statusMsg;
+    }
+
     public static String[][] getMoviesInfoStringsFromJson(Context context, String moviesJsonStr)
             throws JSONException {
 
@@ -51,7 +78,8 @@ public final class MovieDBJsonUtils {
         final String POSTER_BASE_URL = "http://image.tmdb.org/t/p/w342";
 
 
-        final String OWM_MESSAGE_CODE = "cod";
+        //final String OWM_MESSAGE_CODE = "status_code";
+
 
         /* String array to hold each movie information String
         * id = 0
@@ -66,20 +94,22 @@ public final class MovieDBJsonUtils {
         JSONObject moviesJson = new JSONObject(moviesJsonStr);
 
         /* Is there an error? */
-        if (moviesJson.has(OWM_MESSAGE_CODE)) {
-            int errorCode = moviesJson.getInt(OWM_MESSAGE_CODE);
+        /*if (moviesJson.has(OWM_MESSAGE_CODE)) {
 
-            switch (errorCode) {
-                case HttpURLConnection.HTTP_OK:
-                    break;
-                case HttpURLConnection.HTTP_NOT_FOUND:
-                    /* Location invalid */
+            int msgCode = moviesJson.getInt(OWM_MESSAGE_CODE);
+
+            switch (msgCode) {
+                case 7: //401 "status_message": "Invalid API key: You must be granted a valid key.",
                     return null;
+
+                case 34://404 "status_message": "The resource you requested could not be found.",
+                    return null;
+
                 default:
-                    /* Server probably down */
+                    *//* Server probably down *//*
                     return null;
             }
-        }
+        }*/
 
         JSONArray movieData = moviesJson.getJSONArray(MOVIE_DATA);
         movieInfo = new String[movieData.length()][];

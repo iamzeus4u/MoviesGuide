@@ -29,6 +29,7 @@
         android:layout_height="wrap_content"
         android:padding="16dp"
         android:text="@string/error_message"
+        android:layout_gravity="center"
         android:textSize="20sp"
         android:visibility="invisible" />
 

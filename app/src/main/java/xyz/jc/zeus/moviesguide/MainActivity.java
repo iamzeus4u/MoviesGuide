@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterOnCl
 
     private String[][] mMoviesInfo;
     private String sortBy;
+    private String errorMsg;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -179,12 +180,14 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterOnCl
                     String jsonMovieDbResponse = NetworkUtils
                             .getResponseFromHttpUrl(aMovieDbRequestUrl);
 
-                    String[][] tmpMInfo = MovieDBJsonUtils
-                            .getMoviesInfoStringsFromJson(MainActivity.this, jsonMovieDbResponse);
+                    String[][] tmpMInfo = MovieDBJsonUtils.getMoviesInfoStringsFromJson(MainActivity.this, jsonMovieDbResponse);
 
                     if (tmpMInfo != null) {
                         Collections.addAll(tempMovieInfo, tmpMInfo);
                     }
+                    /*else {
+                        errorMsg = MovieDBJsonUtils.getMoviesErrorStringsFromJson(MainActivity.this,jsonMovieDbResponse);
+                    }*/
 
                 }
 
@@ -197,6 +200,8 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterOnCl
                 e.printStackTrace();
                 return null;
             }
+
+
         }
 
         @Override
@@ -208,6 +213,10 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterOnCl
                 showPosterDataView();
                 mMoviesAdapter.setPosterData(moviesData);
             } else {
+                /*if (errorMsg != null){
+                    TextView errorTextView = (TextView) findViewById(R.id.error_message_display);
+                    errorTextView.setText(errorMsg);
+                }*/
                 showErrorMessage();
             }
         }
