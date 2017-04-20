@@ -31,21 +31,12 @@ import com.squareup.picasso.Picasso;
  * {@link RecyclerView}
  */
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdapterViewHolder> {
-
-    private String[][] mMoviesData;
-
     /*
      * An on-click handler that we've defined to make it easy for an Activity to interface with
      * our RecyclerView
      */
     private final MoviesAdapterOnClickHandler mClickHandler;
-
-    /**
-     * The interface that receives onClick messages.
-     */
-    public interface MoviesAdapterOnClickHandler {
-        void onClick(int selectedMovie);
-    }
+    private String[][] mMoviesData;
 
     /**
      * Creates a MoviesAdapter.
@@ -55,35 +46,6 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
      */
     public MoviesAdapter(MoviesAdapterOnClickHandler clickHandler) {
         mClickHandler = clickHandler;
-    }
-
-    /**
-     * Cache of the children views for a moviedb list item.
-     */
-    public class MoviesAdapterViewHolder extends RecyclerView.ViewHolder implements OnClickListener {
-        public final TextView mMovieTitleTextView;
-        public final TextView mMovieRatingTextView;
-        public final ImageView mMoviePosterImageView;
-
-        public MoviesAdapterViewHolder(View view) {
-            super(view);
-            mMovieTitleTextView = (TextView) view.findViewById(R.id.movie_title);
-            mMovieRatingTextView = (TextView) view.findViewById(R.id.movie_rating);
-            mMoviePosterImageView = (ImageView) view.findViewById(R.id.movie_poster);
-
-            view.setOnClickListener(this);
-        }
-
-        /**
-         * This gets called by the child views during a click.
-         *
-         * @param v The View that was clicked
-         */
-        @Override
-        public void onClick(View v) {
-            int adapterPosition = getAdapterPosition();
-            mClickHandler.onClick(adapterPosition);
-        }
     }
 
     /**
@@ -115,8 +77,8 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
      * passed into us.
      *
      * @param moviesAdapterViewHolder The ViewHolder which should be updated to represent the
-     *                                  contents of the item at the given position in the data set.
-     * @param position                  The position of the item within the adapter's data set.
+     *                                contents of the item at the given position in the data set.
+     * @param position                The position of the item within the adapter's data set.
      */
     @Override
     public void onBindViewHolder(MoviesAdapterViewHolder moviesAdapterViewHolder, int position) {
@@ -124,12 +86,10 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
         String movieTitle = mMoviesData[position][1];
         String movieRating = mMoviesData[position][5];
         String moviePoster = mMoviesData[position][2];
-
         moviesAdapterViewHolder.mMovieTitleTextView.setText(movieTitle);
         moviesAdapterViewHolder.mMovieRatingTextView.setText(movieRating);
         Picasso.with(moviesAdapterViewHolder.itemView.getContext()).load(moviePoster).into(moviesAdapterViewHolder.mMoviePosterImageView);
     }
-
     /**
      * This method simply returns the number of items to display. It is used behind the scenes
      * to help layout our Views and for animations.
@@ -147,10 +107,45 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
      * created one. This is handy when we get new data from the web but don't want to create a
      * new MoviesAdapter to display it.
      *
-     * @param moviesData The new weather data to be displayed.
+     * @param moviesData The new movies data to be displayed.
      */
     public void setPosterData(String[][] moviesData) {
         mMoviesData = moviesData;
         notifyDataSetChanged();
+    }
+
+    /**
+     * The interface that receives onClick messages.
+     */
+    public interface MoviesAdapterOnClickHandler {
+        void onClick(int selectedMovie);
+    }
+
+    /**
+     * Cache of the children views for a moviedb list item.
+     */
+    public class MoviesAdapterViewHolder extends RecyclerView.ViewHolder implements OnClickListener {
+        public final TextView mMovieTitleTextView;
+        public final TextView mMovieRatingTextView;
+        public final ImageView mMoviePosterImageView;
+
+        public MoviesAdapterViewHolder(View view) {
+            super(view);
+            mMovieTitleTextView = (TextView) view.findViewById(R.id.movie_title);
+            mMovieRatingTextView = (TextView) view.findViewById(R.id.movie_rating);
+            mMoviePosterImageView = (ImageView) view.findViewById(R.id.movie_poster);
+            view.setOnClickListener(this);
+        }
+
+        /**
+         * This gets called by the child views during a click.
+         *
+         * @param v The View that was clicked
+         */
+        @Override
+        public void onClick(View v) {
+            int adapterPosition = getAdapterPosition();
+            mClickHandler.onClick(adapterPosition);
+        }
     }
 }

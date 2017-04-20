@@ -20,53 +20,17 @@ import android.content.Context;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 /**
  * Utility functions to handle MoviesDb JSON data.
  */
 public final class MovieDBJsonUtils {
-
     /**
-
      * @param moviesJsonStr JSON response from server
-     *
      * @return Array of Strings describing movie data
-     *
      * @throws JSONException If JSON data cannot be properly parsed
      */
-    public static String getMoviesErrorStringsFromJson(Context context, String moviesJsonStr)
-            throws JSONException {
-        final String OWM_MESSAGE_CODE = "status_code";
-        final String OWM_MESSAGE = "status_message";
-        String statusMsg = null;
-
-        JSONObject moviesJson = new JSONObject(moviesJsonStr);
-
-        if (moviesJson.has(OWM_MESSAGE_CODE)) {
-
-            int msgCode = moviesJson.getInt(OWM_MESSAGE_CODE);
-
-            switch (msgCode) {
-                case 7: //401 "status_message": "Invalid API key: You must be granted a valid key.",
-                    statusMsg = moviesJson.getString(OWM_MESSAGE);
-                    break;
-
-                case 34://404 "status_message": "The resource you requested could not be found.",
-                    return null;
-
-                default:
-                    /* Server probably down */
-                    return null;
-            }
-        }
-
-        return statusMsg;
-    }
-
     public static String[][] getMoviesInfoStringsFromJson(Context context, String moviesJsonStr)
             throws JSONException {
-
-        /* Weather information. Each day's moviedb info is an element of the "list" array */
         final String MOVIE_DATA = "results";
         final String ID = "id";
         final String ORIGINAL_TITLE = "original_title";
@@ -74,12 +38,7 @@ public final class MovieDBJsonUtils {
         final String MOVIES_OVERVIEW = "overview";
         final String RELEASE_DATE = "release_date";
         final String USER_RATING = "vote_average";
-
         final String POSTER_BASE_URL = "http://image.tmdb.org/t/p/w342";
-
-
-        //final String OWM_MESSAGE_CODE = "status_code";
-
 
         /* String array to hold each movie information String
         * id = 0
@@ -90,36 +49,13 @@ public final class MovieDBJsonUtils {
         * vote_average = 5
         * */
         String[][] movieInfo = null;
-
         JSONObject moviesJson = new JSONObject(moviesJsonStr);
-
-        /* Is there an error? */
-        /*if (moviesJson.has(OWM_MESSAGE_CODE)) {
-
-            int msgCode = moviesJson.getInt(OWM_MESSAGE_CODE);
-
-            switch (msgCode) {
-                case 7: //401 "status_message": "Invalid API key: You must be granted a valid key.",
-                    return null;
-
-                case 34://404 "status_message": "The resource you requested could not be found.",
-                    return null;
-
-                default:
-                    *//* Server probably down *//*
-                    return null;
-            }
-        }*/
-
         JSONArray movieData = moviesJson.getJSONArray(MOVIE_DATA);
         movieInfo = new String[movieData.length()][];
 
-        for (int i = 0; i<movieData.length(); i++) {
-
+        for (int i = 0; i < movieData.length(); i++) {
             JSONObject movieInfoJson = movieData.getJSONObject(i);
-
             movieInfo[i] = new String[6];
-
             movieInfo[i][0] = movieInfoJson.getString(ID);
             movieInfo[i][1] = movieInfoJson.getString(ORIGINAL_TITLE);
             movieInfo[i][2] = POSTER_BASE_URL + movieInfoJson.getString(POSTER_URL);
@@ -127,8 +63,6 @@ public final class MovieDBJsonUtils {
             movieInfo[i][4] = movieInfoJson.getString(RELEASE_DATE);
             movieInfo[i][5] = movieInfoJson.getString(USER_RATING);
         }
-
         return movieInfo;
     }
-
 }
