@@ -8,7 +8,8 @@
     <string name="action_refresh">Refresh</string>
 
     <!--Used in overflow menu to refresh movie data-->
-    <string name="action_settings">sort</string>
+    <string name="action_settings">Settings</string>
+
 
     <string name="error_message">
         An error has occurred. Please try again by clicking REFRESH
@@ -19,5 +20,14 @@
     <string name="pick_sort">Sort By</string>
     <string name="pick_popular">popular</string>
     <string name="pick_rated">top_rated</string>
+
+    <string name="pref_rating_label">Rating Option</string>
+    <string name="pref_rating_key" translatable="false">rating</string>
+
+    <string name="pref_rating_label_popularity">Popularity</string>
+    <string name="pref_rating_label_mostrated">Most Rated</string>
+
+    <string name="pref_rating_popularity" translatable="false">popular</string>
+    <string name="pref_rating_mostrated" translatable="false">top_rated</string>
 
 </resources>

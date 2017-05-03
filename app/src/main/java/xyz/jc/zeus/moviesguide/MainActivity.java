@@ -15,14 +15,15 @@
  */
 package xyz.jc.zeus.moviesguide;
 
-import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.AsyncTask;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
@@ -31,6 +32,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -41,8 +43,11 @@ import xyz.jc.zeus.moviesguide.MoviesAdapter.MoviesAdapterOnClickHandler;
 import xyz.jc.zeus.moviesguide.utilities.MovieDBJsonUtils;
 import xyz.jc.zeus.moviesguide.utilities.NetworkUtils;
 
-public class MainActivity extends AppCompatActivity implements MoviesAdapterOnClickHandler {
+public class MainActivity extends AppCompatActivity implements MoviesAdapterOnClickHandler, SharedPreferences.OnSharedPreferenceChangeListener, LoaderCallbacks<String[][]> {
 
+    private static final int MOVIE_LOADER_ID = 0;
+    private static boolean MAIN_PREFERENCES_UPDATED = false;
+    private static Toast sortedToast;
     private RecyclerView mRecyclerView;
     private MoviesAdapter mMoviesAdapter;
     private TextView mErrorMessageDisplay;
@@ -63,12 +68,9 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterOnCl
         /* This TextView is used to display errors and will be hidden if there are no errors */
         mErrorMessageDisplay = (TextView) findViewById(R.id.error_message_display);
 
-        /* This String is used to store the sort parameter and by default set to "popular" */
-        if (  savedInstanceState!=null  ){
-            sortBy= savedInstanceState.getString("sortby");
-        }else{
-            sortBy = getString(R.string.pick_popular);
-        }
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        sortBy = prefs.getString(getString(R.string.pref_rating_key), getString(R.string.pref_rating_popularity));
+
         GridLayoutManager layoutManager = new GridLayoutManager(this, 3, GridLayoutManager.VERTICAL, false);
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setHasFixedSize(true);
@@ -88,7 +90,24 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterOnCl
         mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
 
         /* Once all of our views are setup, we can load the movies data. */
-        loadMovieData(sortBy);
+        loadMovieData();
+
+        int loaderId = MOVIE_LOADER_ID;
+        Bundle bundleForLoader = null;
+        getSupportLoaderManager().initLoader(loaderId, bundleForLoader, MainActivity.this);
+        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (MAIN_PREFERENCES_UPDATED) {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+            sortBy = prefs.getString(getString(R.string.pref_rating_key), getString(R.string.pref_rating_popularity));
+            loadMovieData();
+            getSupportLoaderManager().restartLoader(MOVIE_LOADER_ID, null, MainActivity.this);
+            MAIN_PREFERENCES_UPDATED = false;
+        }
     }
 
     @Override
@@ -97,21 +116,22 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterOnCl
         SavedInstanceState.putString("sortby", sortBy);
     }
 
-    private void loadMovieData(String sortBy) {
+    private void loadMovieData() {
         showPosterDataView();
-        if (sortBy == getString(R.string.pick_popular)) {
-            this.setTitle(getString(R.string.app_name) + ": sorted by popularity");
-        } else if (sortBy == getString(R.string.pick_rated)) {
-            this.setTitle(getString(R.string.app_name) + ": sorted by user rating");
-        } else {
-            this.setTitle(getString(R.string.app_name));
+        invalidateData();
+        if (sortBy.equals(getString(R.string.pref_rating_popularity))) {
+            sortedToast = Toast.makeText(this, "Sorted by popularity", Toast.LENGTH_LONG);
+            sortedToast.show();
+        } else if (sortBy.equals(getString(R.string.pref_rating_mostrated))) {
+            sortedToast = Toast.makeText(this, "Sorted by user rating", Toast.LENGTH_LONG);
+            sortedToast.show();
         }
-        new FetchMovieDataTask().execute(sortBy);
     }
 
     /**
      * This method is overridden by our MainActivity class in order to handle RecyclerView item
      * clicks.     *
+     *
      * @param selectedMovie The movie poster that was clicked
      */
     @Override
@@ -142,28 +162,15 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterOnCl
         mErrorMessageDisplay.setVisibility(View.VISIBLE);
     }
 
+    private void invalidateData() {
+        mMoviesAdapter.setPosterData(null);
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.moviedb, menu);
+        inflater.inflate(R.menu.main, menu);
         return true;
-    }
-
-    public Dialog sortCreateDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.pick_sort)
-                .setItems(R.array.sort_array, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (which == 1) {
-                            sortBy = getString(R.string.pick_rated);
-                        } else {
-                            sortBy = getString(R.string.pick_popular);
-                        }
-                        mMoviesAdapter.setPosterData(null);
-                        loadMovieData(sortBy);
-                    }
-                });
-        return builder.create();
     }
 
     @Override
@@ -171,58 +178,80 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterOnCl
         int id = item.getItemId();
         switch (id) {
             case R.id.action_refresh:
-                mMoviesAdapter.setPosterData(null);
-                loadMovieData(sortBy);
+                loadMovieData();
+                getSupportLoaderManager().restartLoader(MOVIE_LOADER_ID, null, MainActivity.this);
                 return true;
-            case R.id.action_sort:
-                sortCreateDialog().show();
+            case R.id.action_settings:
+                Intent startSettingsActivityIntent = new Intent(this, SettingsActivity.class);
+                startActivity(startSettingsActivityIntent);
         }
         return super.onOptionsItemSelected(item);
     }
 
-    public class FetchMovieDataTask extends AsyncTask<String, Void, String[][]> {
+    @Override
+    public Loader<String[][]> onCreateLoader(int id, Bundle args) {
+        return new AsyncTaskLoader<String[][]>(this) {
+            String[][] moviesInfo = null;
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            mLoadingIndicator.setVisibility(View.VISIBLE);
-        }
-
-        @Override
-        protected String[][] doInBackground(String... params) {
-            if (params.length == 0) {
-                return null;
-            }
-            String category = params[0];
-            URL[] movieDbRequestUrl = NetworkUtils.buildUrl(category);
-            List<String[]> tempMovieInfo = new ArrayList<>();
-            try {
-                //Iterating through the array of URL received from NetworkUtils.buildUrl()
-                for (URL aMovieDbRequestUrl : movieDbRequestUrl) {
-                    String jsonMovieDbResponse = NetworkUtils.getResponseFromHttpUrl(aMovieDbRequestUrl);
-                    String[][] tmpMInfo = MovieDBJsonUtils.getMoviesInfoStringsFromJson(MainActivity.this, jsonMovieDbResponse);
-                    if (tmpMInfo != null) {
-                        Collections.addAll(tempMovieInfo, tmpMInfo);
-                    }
+            @Override
+            protected void onStartLoading() {
+                if (moviesInfo != null) {
+                    deliverResult(moviesInfo);
+                } else {
+                    mLoadingIndicator.setVisibility(View.VISIBLE);
+                    forceLoad();
                 }
-                String[][] moviesInfo = new String[tempMovieInfo.size()][];
-                moviesInfo = tempMovieInfo.toArray(moviesInfo);
-                return moviesInfo;
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
             }
-        }
-        @Override
-        protected void onPostExecute(String[][] moviesData) {
-            mLoadingIndicator.setVisibility(View.INVISIBLE);
-            mMoviesInfo = moviesData;
-            if (moviesData != null) {
-                showPosterDataView();
-                mMoviesAdapter.setPosterData(moviesData);
-            } else {
-                showErrorMessage();
+
+            @Override
+            public String[][] loadInBackground() {
+                String category = sortBy;
+                URL[] movieDbRequestUrl = NetworkUtils.buildUrl(category);
+                List<String[]> tempMovieInfo = new ArrayList<>();
+                try {
+                    //Iterating through the array of URL received from NetworkUtils.buildUrl()
+                    for (URL aMovieDbRequestUrl : movieDbRequestUrl) {
+                        String jsonMovieDbResponse = NetworkUtils.getResponseFromHttpUrl(aMovieDbRequestUrl);
+                        String[][] tmpMInfo = MovieDBJsonUtils.getMoviesInfoStringsFromJson(MainActivity.this, jsonMovieDbResponse);
+                        if (tmpMInfo != null) {
+                            Collections.addAll(tempMovieInfo, tmpMInfo);
+                        }
+                    }
+                    moviesInfo = new String[tempMovieInfo.size()][];
+                    moviesInfo = tempMovieInfo.toArray(moviesInfo);
+                    return moviesInfo;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return null;
+                }
             }
+
+            public void deliverResult(String[][] data) {
+                moviesInfo = data;
+                super.deliverResult(data);
+            }
+        };
+    }
+
+    @Override
+    public void onLoadFinished(Loader<String[][]> loader, String[][] data) {
+        mLoadingIndicator.setVisibility(View.INVISIBLE);
+        mMoviesInfo = data;
+        if (data != null) {
+            showPosterDataView();
+            mMoviesAdapter.setPosterData(data);
+        } else {
+            showErrorMessage();
         }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<String[][]> loader) {
+
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        MAIN_PREFERENCES_UPDATED = true;
     }
 }

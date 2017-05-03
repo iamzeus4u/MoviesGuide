@@ -5,4 +5,14 @@
         <item>Most Rated</item>
     </string-array>
 
+    <string-array name="pref_rating_options">
+        <item>@string/pref_rating_label_popularity</item>
+        <item>@string/pref_rating_label_mostrated</item>
+    </string-array>
+
+    <string-array name="pref_rating_values">
+        <item>@string/pref_rating_popularity</item>
+        <item>@string/pref_rating_mostrated</item>
+    </string-array>
+
 </resources>

@@ -88,13 +88,13 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
         String moviePoster = mMoviesData[position][2];
         moviesAdapterViewHolder.mMovieTitleTextView.setText(movieTitle);
         moviesAdapterViewHolder.mMovieRatingTextView.setText(movieRating);
-        Picasso.with(moviesAdapterViewHolder.itemView.getContext()).load(moviePoster).into(moviesAdapterViewHolder.mMoviePosterImageView);
+        Picasso.with(moviesAdapterViewHolder.itemView.getContext()).load(moviePoster).placeholder(R.drawable.poster_placeholder).into(moviesAdapterViewHolder.mMoviePosterImageView);
     }
     /**
      * This method simply returns the number of items to display. It is used behind the scenes
      * to help layout our Views and for animations.
      *
-     * @return The number of items available in our moviedb
+     * @return The number of items available in our main
      */
     @Override
     public int getItemCount() {
@@ -122,7 +122,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
     }
 
     /**
-     * Cache of the children views for a moviedb list item.
+     * Cache of the children views for a main list item.
      */
     public class MoviesAdapterViewHolder extends RecyclerView.ViewHolder implements OnClickListener {
         public final TextView mMovieTitleTextView;

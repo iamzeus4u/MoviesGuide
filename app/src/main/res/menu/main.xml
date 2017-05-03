@@ -13,8 +13,7 @@
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
      See the License for the specific language governing permissions and
      limitations under the License.
--->
-<!-- The menu found in the main multi-day moviedb  -->
+--><!-- The menu found in the main multi-day main  -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto"
       xmlns:tools="http://schemas.android.com/tools"
@@ -25,8 +24,8 @@
         android:title="@string/action_refresh"
         app:showAsAction="ifRoom"/>
     <item
-        android:id="@+id/action_sort"
-        android:orderInCategory="2"
+        android:id="@+id/action_settings"
+        android:orderInCategory="100"
         android:title="@string/action_settings"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="never" />
 </menu>
