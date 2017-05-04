@@ -34,7 +34,7 @@ public final class MovieDBJsonUtils {
         final String MOVIE_DATA = "results";
         final String ID = "id";
         final String ORIGINAL_TITLE = "original_title";
-        final String POSTER_URL = "poster_path";
+        final String POSTER_PATH = "poster_path";
         final String MOVIES_OVERVIEW = "overview";
         final String RELEASE_DATE = "release_date";
         final String USER_RATING = "vote_average";
@@ -58,7 +58,7 @@ public final class MovieDBJsonUtils {
             movieInfo[i] = new String[6];
             movieInfo[i][0] = movieInfoJson.getString(ID);
             movieInfo[i][1] = movieInfoJson.getString(ORIGINAL_TITLE);
-            movieInfo[i][2] = POSTER_BASE_URL + movieInfoJson.getString(POSTER_URL);
+            movieInfo[i][2] = POSTER_BASE_URL + movieInfoJson.getString(POSTER_PATH);
             movieInfo[i][3] = movieInfoJson.getString(MOVIES_OVERVIEW);
             movieInfo[i][4] = movieInfoJson.getString(RELEASE_DATE);
             movieInfo[i][5] = movieInfoJson.getString(USER_RATING);

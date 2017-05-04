@@ -45,6 +45,11 @@
                 android:value="xyz.jc.zeus.moviesguide.MainActivity" />
         </activity>
         <activity android:name=".SettingsActivity"></activity>
+
+        <provider
+            android:authorities="xyz.jc.zeus.moviesguide.data.MovieProvider"
+            android:name="xyz.jc.zeus.moviesguide.data.generated.MovieProvider"
+            android:exported="false" />
     </application>
 
 </manifest>

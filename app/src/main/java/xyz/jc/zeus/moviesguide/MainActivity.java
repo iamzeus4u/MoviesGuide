@@ -15,9 +15,11 @@
  */
 package xyz.jc.zeus.moviesguide;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.AsyncTaskLoader;
@@ -40,6 +42,8 @@ import java.util.Collections;
 import java.util.List;
 
 import xyz.jc.zeus.moviesguide.MoviesAdapter.MoviesAdapterOnClickHandler;
+import xyz.jc.zeus.moviesguide.data.MovieColumns;
+import xyz.jc.zeus.moviesguide.data.MovieProvider;
 import xyz.jc.zeus.moviesguide.utilities.MovieDBJsonUtils;
 import xyz.jc.zeus.moviesguide.utilities.NetworkUtils;
 
@@ -47,7 +51,6 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterOnCl
 
     private static final int MOVIE_LOADER_ID = 0;
     private static boolean MAIN_PREFERENCES_UPDATED = false;
-    private static Toast sortedToast;
     private RecyclerView mRecyclerView;
     private MoviesAdapter mMoviesAdapter;
     private TextView mErrorMessageDisplay;
@@ -69,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterOnCl
         mErrorMessageDisplay = (TextView) findViewById(R.id.error_message_display);
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        sortBy = prefs.getString(getString(R.string.pref_rating_key), getString(R.string.pref_rating_popularity));
+        sortBy = prefs.getString(getString(R.string.pref_sort_key), getString(R.string.pref_sort_popularity));
 
         GridLayoutManager layoutManager = new GridLayoutManager(this, 3, GridLayoutManager.VERTICAL, false);
         mRecyclerView.setLayoutManager(layoutManager);
@@ -92,18 +95,16 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterOnCl
         /* Once all of our views are setup, we can load the movies data. */
         loadMovieData();
 
-        int loaderId = MOVIE_LOADER_ID;
-        Bundle bundleForLoader = null;
-        getSupportLoaderManager().initLoader(loaderId, bundleForLoader, MainActivity.this);
+        getSupportLoaderManager().initLoader(MOVIE_LOADER_ID, null, MainActivity.this);
         PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        if (MAIN_PREFERENCES_UPDATED) {
+        if (MAIN_PREFERENCES_UPDATED | sortBy.equals(getString(R.string.pref_sort_favourite))) {
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-            sortBy = prefs.getString(getString(R.string.pref_rating_key), getString(R.string.pref_rating_popularity));
+            sortBy = prefs.getString(getString(R.string.pref_sort_key), getString(R.string.pref_sort_popularity));
             loadMovieData();
             getSupportLoaderManager().restartLoader(MOVIE_LOADER_ID, null, MainActivity.this);
             MAIN_PREFERENCES_UPDATED = false;
@@ -119,11 +120,15 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterOnCl
     private void loadMovieData() {
         showPosterDataView();
         invalidateData();
-        if (sortBy.equals(getString(R.string.pref_rating_popularity))) {
-            sortedToast = Toast.makeText(this, "Sorted by popularity", Toast.LENGTH_LONG);
+        Toast sortedToast;
+        if (sortBy.equals(getString(R.string.pref_sort_popularity))) {
+            sortedToast = Toast.makeText(this, getString(R.string.toast_popularity), Toast.LENGTH_LONG);
             sortedToast.show();
-        } else if (sortBy.equals(getString(R.string.pref_rating_mostrated))) {
-            sortedToast = Toast.makeText(this, "Sorted by user rating", Toast.LENGTH_LONG);
+        } else if (sortBy.equals(getString(R.string.pref_sort_mostrated))) {
+            sortedToast = Toast.makeText(this, getString(R.string.toast_mostrated), Toast.LENGTH_LONG);
+            sortedToast.show();
+        } else {
+            sortedToast = Toast.makeText(this, getString(R.string.toast_favourite), Toast.LENGTH_LONG);
             sortedToast.show();
         }
     }
@@ -209,13 +214,33 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterOnCl
                 URL[] movieDbRequestUrl = NetworkUtils.buildUrl(category);
                 List<String[]> tempMovieInfo = new ArrayList<>();
                 try {
-                    //Iterating through the array of URL received from NetworkUtils.buildUrl()
-                    for (URL aMovieDbRequestUrl : movieDbRequestUrl) {
-                        String jsonMovieDbResponse = NetworkUtils.getResponseFromHttpUrl(aMovieDbRequestUrl);
-                        String[][] tmpMInfo = MovieDBJsonUtils.getMoviesInfoStringsFromJson(MainActivity.this, jsonMovieDbResponse);
-                        if (tmpMInfo != null) {
+                    if (!sortBy.equals(getString(R.string.pref_sort_favourite))) {
+                        //Iterating through the array of URL received from NetworkUtils.buildUrl()
+                        for (URL aMovieDbRequestUrl : movieDbRequestUrl) {
+                            String jsonMovieDbResponse = NetworkUtils.getResponseFromHttpUrl(aMovieDbRequestUrl);
+                            String[][] tmpMInfo = MovieDBJsonUtils.getMoviesInfoStringsFromJson(MainActivity.this, jsonMovieDbResponse);
+                            if (tmpMInfo != null) {
+                                Collections.addAll(tempMovieInfo, tmpMInfo);
+                            }
+                        }
+                    } else {
+                        ContentResolver resolver = getContentResolver();
+                        Cursor cursor = resolver.query(MovieProvider.Movies.CONTENT_URI, null, null, null, null);
+                        if (cursor != null && cursor.getCount() > 0) {
+                            String[][] tmpMInfo = new String[cursor.getCount()][6];
+                            cursor.moveToFirst();
+                            while (!cursor.isAfterLast()) {
+                                tmpMInfo[cursor.getPosition()][0] = cursor.getString(cursor.getColumnIndex(MovieColumns.ID));
+                                tmpMInfo[cursor.getPosition()][1] = cursor.getString(cursor.getColumnIndex(MovieColumns.ORIGINAL_TITLE));
+                                tmpMInfo[cursor.getPosition()][2] = cursor.getString(cursor.getColumnIndex(MovieColumns.POSTER_PATH));
+                                tmpMInfo[cursor.getPosition()][3] = cursor.getString(cursor.getColumnIndex(MovieColumns.MOVIES_OVERVIEW));
+                                tmpMInfo[cursor.getPosition()][4] = cursor.getString(cursor.getColumnIndex(MovieColumns.RELEASE_DATE));
+                                tmpMInfo[cursor.getPosition()][5] = cursor.getString(cursor.getColumnIndex(MovieColumns.USER_RATING));
+                                cursor.moveToNext();
+                            }
                             Collections.addAll(tempMovieInfo, tmpMInfo);
                         }
+                        cursor.close();
                     }
                     moviesInfo = new String[tempMovieInfo.size()][];
                     moviesInfo = tempMovieInfo.toArray(moviesInfo);
