@@ -70,6 +70,24 @@ public final class NetworkUtils {
         return url;
     }
 
+    public static URL buildUrlForDetail(String id, String data) {
+        Uri builtUri;
+        URL url;
+        builtUri = Uri.parse(FORECAST_BASE_URL).buildUpon()
+                .appendPath(id)
+                .appendPath(data)
+                .appendQueryParameter(QUERY_API_PARAM, api)
+                .build();
+        url = null;
+        try {
+            url = new URL(builtUri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        Log.d(TAG, "Built URI " + url);
+        return url;
+    }
+
     /**
      * This method returns the entire result from the HTTP response.
      *

@@ -238,9 +238,9 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterOnCl
                                 tmpMInfo[cursor.getPosition()][5] = cursor.getString(cursor.getColumnIndex(MovieColumns.USER_RATING));
                                 cursor.moveToNext();
                             }
+                            cursor.close();
                             Collections.addAll(tempMovieInfo, tmpMInfo);
                         }
-                        cursor.close();
                     }
                     moviesInfo = new String[tempMovieInfo.size()][];
                     moviesInfo = tempMovieInfo.toArray(moviesInfo);

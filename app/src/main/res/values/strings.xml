@@ -21,7 +21,7 @@
     <string name="toast_mostrated">Sorted by user rating</string>
     <string name="toast_favourite">Displaying Favourites</string>
 
-    <string name="user_rating">User Rating:\t</string>
+    <string name="user_rating">User Rating:\u0020</string>
 
     <string name="pick_sort">Sort By</string>
     <string name="pick_popular">popular</string>
@@ -37,5 +37,6 @@
     <string name="pref_sort_popularity" translatable="false">popular</string>
     <string name="pref_sort_mostrated" translatable="false">top_rated</string>
     <string name="pref_sort_favourite" translatable="false">favourite</string>
+    <string name="reviewed_by">Reviewed by\u0020</string>
 
 </resources>

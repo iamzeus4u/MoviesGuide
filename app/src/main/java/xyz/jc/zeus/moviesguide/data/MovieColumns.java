@@ -45,4 +45,7 @@ public interface MovieColumns {
     @DataType(TEXT)
     @NotNull
     String USER_RATING = "vote_average";
+    @DataType(TEXT)
+    @NotNull
+    String JSON_REVIEW = "jSONreview";
 }

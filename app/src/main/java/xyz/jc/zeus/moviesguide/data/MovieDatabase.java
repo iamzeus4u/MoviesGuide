@@ -12,4 +12,7 @@ public final class MovieDatabase {
 
     @Table(MovieColumns.class)
     public static final String FAV_MOVIES = "movies";
+/*
+    @Table(ReviewColumns.class)
+    public static final String FAV_MOVIES_REVIEWS = "reviews";*/
 }

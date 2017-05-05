@@ -20,6 +20,11 @@ import android.content.Context;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.List;
+
+import xyz.jc.zeus.moviesguide.MovieReview;
+
 /**
  * Utility functions to handle MoviesDb JSON data.
  */
@@ -62,6 +67,60 @@ public final class MovieDBJsonUtils {
             movieInfo[i][3] = movieInfoJson.getString(MOVIES_OVERVIEW);
             movieInfo[i][4] = movieInfoJson.getString(RELEASE_DATE);
             movieInfo[i][5] = movieInfoJson.getString(USER_RATING);
+        }
+        return movieInfo;
+    }
+
+    public static List<MovieReview> getMoviesReviewsStringsFromJson(String reviewJsonStr)
+            throws JSONException {
+        final String MOVIE_DATA = "results";
+        /*final String ID = "id";
+        final String AUTHOR = "author";
+        final String CONTENT = "content";
+        final String PATH = "url";*/
+
+        String[][] movieInfo = null;
+        JSONObject reviewJson = new JSONObject(reviewJsonStr);
+        JSONArray reviewData = reviewJson.getJSONArray(MOVIE_DATA);
+        /*
+        movieInfo = new String[reviewData.length()][];
+
+        for (int i = 0; i < reviewData.length(); i++) {
+            JSONObject reviewInfoJson = reviewData.getJSONObject(i);
+            movieInfo[i] = new String[4];
+            movieInfo[i][0] = reviewInfoJson.getString(ID);
+            movieInfo[i][1] = reviewInfoJson.getString(AUTHOR);
+            movieInfo[i][2] = reviewInfoJson.getString(CONTENT);
+            movieInfo[i][3] = reviewInfoJson.getString(PATH);
+
+        }*/
+        return MovieReview.fromJson(reviewData);
+    }
+
+    public static String[][] getMoviesVideosStringsFromJson(String videosJsonStr)
+            throws JSONException {
+        final String MOVIE_DATA = "results";
+        final String ID = "id";
+        final String NAME = "name";
+        final String SITE = "site";
+        final String KEY = "key";
+        final String TYPE = "type";
+        final String SITE_BASE_URL = "https://youtu.be/";
+
+
+        String[][] movieInfo = null;
+        JSONObject videosJson = new JSONObject(videosJsonStr);
+        JSONArray videosData = videosJson.getJSONArray(MOVIE_DATA);
+        movieInfo = new String[videosData.length()][];
+
+        for (int i = 0; i < videosData.length(); i++) {
+            JSONObject videoInfoJson = videosData.getJSONObject(i);
+            movieInfo[i] = new String[4];
+            movieInfo[i][0] = videoInfoJson.getString(ID);
+            movieInfo[i][1] = videoInfoJson.getString(NAME);
+            movieInfo[i][2] = SITE_BASE_URL + videoInfoJson.getString(KEY);
+            movieInfo[i][3] = videoInfoJson.getString(TYPE);
+
         }
         return movieInfo;
     }

@@ -43,5 +43,26 @@ public final class MovieProvider {
             return buildUri(PATH, id);
         }
     }
+
+    /*@TableEndpoint(table = MovieDatabase.FAV_MOVIES_REVIEWS)
+    public static class Reviews {
+        private static final String PATH = "reviews";
+
+        @ContentUri(
+                path = PATH,
+                type = "vnd.android.cursor.dir/review",
+                defaultSort = ReviewColumns._ID + " ASC")
+        public static final Uri CONTENT_URI = buildUri(PATH);
+
+        @InexactContentUri(
+                name = ReviewColumns.ID,
+                path = PATH + "/#",
+                type = "vnd.android.cursor.item/review",
+                whereColumn = ReviewColumns.ID,
+                pathSegment = 1)
+        public static Uri withId(String id) {
+            return buildUri(PATH, id);
+        }
+    }*/
 }
 
