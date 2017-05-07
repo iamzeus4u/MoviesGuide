@@ -37,6 +37,8 @@
     <string name="pref_sort_popularity" translatable="false">popular</string>
     <string name="pref_sort_mostrated" translatable="false">top_rated</string>
     <string name="pref_sort_favourite" translatable="false">favourite</string>
+
     <string name="reviewed_by">Reviewed by\u0020</string>
+    <string name="watch_video">Watch video on\u0020</string>
 
 </resources>

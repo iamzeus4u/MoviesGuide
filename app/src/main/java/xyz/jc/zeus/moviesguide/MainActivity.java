@@ -111,11 +111,11 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterOnCl
         }
     }
 
-    @Override
+    /*@Override
     protected void onSaveInstanceState(Bundle SavedInstanceState) {
         super.onSaveInstanceState(SavedInstanceState);
         SavedInstanceState.putString("sortby", sortBy);
-    }
+    }*/
 
     private void loadMovieData() {
         showPosterDataView();

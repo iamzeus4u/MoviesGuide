@@ -26,15 +26,17 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Scanner;
 
+import xyz.jc.zeus.moviesguide.data.ApiKeys;
+
 /**
  * These utilities will be used to communicate with the servers.
  */
 public final class NetworkUtils {
     private static final String TAG = xyz.jc.zeus.moviesguide.utilities.NetworkUtils.class.getSimpleName();
-    private static final String FORECAST_BASE_URL = "https://api.themoviedb.org/3/movie";
+    private static final String MOVIE_BASE_URL = "https://api.themoviedb.org/3/movie";
 
     /* The lang we want our API to return */
-    private static final String api = "API_KEY";
+    private static final String api = ApiKeys.MOVIEDB_API_KEY;
     private static final String lang = "en-US";
 
     /* The number of pages we want our API to return */
@@ -53,7 +55,7 @@ public final class NetworkUtils {
         Uri[] builtUri = new Uri[pages];
         URL[] url = new URL[pages];
         for (int page = 1; page <= pages; page++) {
-            builtUri[page - 1] = Uri.parse(FORECAST_BASE_URL).buildUpon()
+            builtUri[page - 1] = Uri.parse(MOVIE_BASE_URL).buildUpon()
                     .appendPath(sortByQuery)
                     .appendQueryParameter(QUERY_API_PARAM, api)
                     .appendQueryParameter(LANG_PARAM, lang)
@@ -73,7 +75,7 @@ public final class NetworkUtils {
     public static URL buildUrlForDetail(String id, String data) {
         Uri builtUri;
         URL url;
-        builtUri = Uri.parse(FORECAST_BASE_URL).buildUpon()
+        builtUri = Uri.parse(MOVIE_BASE_URL).buildUpon()
                 .appendPath(id)
                 .appendPath(data)
                 .appendQueryParameter(QUERY_API_PARAM, api)

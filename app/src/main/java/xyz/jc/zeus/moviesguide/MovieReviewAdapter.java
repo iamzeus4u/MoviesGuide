@@ -13,14 +13,14 @@ import java.util.List;
  * Created by zeus on 04/05/2017.
  */
 
-public class ReviewAdapter extends ArrayAdapter<MovieReview> {
+public class MovieReviewAdapter extends ArrayAdapter<MovieReview> {
 
     private static class ViewHolder {
         private TextView authorTextView;
         private TextView contentTextView;
     }
 
-    public ReviewAdapter(Context context, List<MovieReview> reviews) {
+    public MovieReviewAdapter(Context context, List<MovieReview> reviews) {
         super(context, R.layout.review_list_item, reviews);
     }
 
