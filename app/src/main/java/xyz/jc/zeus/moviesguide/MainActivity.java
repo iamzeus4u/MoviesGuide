@@ -57,6 +57,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterOnCl
     private ProgressBar mLoadingIndicator;
     private String[][] mMoviesInfo;
     private String sortBy;
+    private static final String TAG = xyz.jc.zeus.moviesguide.MainActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,12 +112,6 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterOnCl
         }
     }
 
-    /*@Override
-    protected void onSaveInstanceState(Bundle SavedInstanceState) {
-        super.onSaveInstanceState(SavedInstanceState);
-        SavedInstanceState.putString("sortby", sortBy);
-    }*/
-
     private void loadMovieData() {
         showPosterDataView();
         invalidateData();
@@ -138,13 +133,15 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterOnCl
      * clicks.     *
      *
      * @param selectedMovie The movie poster that was clicked
+     * @param selectedMoviePoster
      */
     @Override
-    public void onClick(int selectedMovie) {
+    public void onClick(int selectedMovie, byte[] selectedMoviePoster) {
         Context context = this;
         Class destinationClass = xyz.jc.zeus.moviesguide.DetailActivity.class;
         Intent intentToStartDetailActivity = new Intent(context, destinationClass);
         intentToStartDetailActivity.putExtra("movie", mMoviesInfo[selectedMovie]);
+        intentToStartDetailActivity.putExtra("selectedMoviePosterBytes", selectedMoviePoster);
         startActivity(intentToStartDetailActivity);
     }
 
@@ -168,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterOnCl
     }
 
     private void invalidateData() {
-        mMoviesAdapter.setPosterData(null);
+        mMoviesAdapter.setPosterData(null, this);
     }
 
     @Override
@@ -264,7 +261,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterOnCl
         mMoviesInfo = data;
         if (data != null) {
             showPosterDataView();
-            mMoviesAdapter.setPosterData(data);
+            mMoviesAdapter.setPosterData(data, this);
         } else {
             showErrorMessage();
         }

@@ -5,6 +5,11 @@
         <item>Most Rated</item>
     </string-array>
 
+    <string-array name="sharing_option">
+        <item>Reviews</item>
+        <item>Trailers</item>
+    </string-array>
+
     <string-array name="pref_sort_options">
         <item>@string/pref_sort_label_popularity</item>
         <item>@string/pref_sort_label_mostrated</item>

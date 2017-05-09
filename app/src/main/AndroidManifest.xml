@@ -39,8 +39,9 @@
         <!-- COMPLETED (4) Configure DetailActivity's up button functionality -->
         <activity
             android:name=".DetailActivity"
-            android:parentActivityName=".MainActivity"
-            android:configChanges="orientation|screenSize">
+            android:parentActivityName=".MainActivity">
+            <!--android:configChanges="orientation|screenSize"-->
+            >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="xyz.jc.zeus.moviesguide.MainActivity" />

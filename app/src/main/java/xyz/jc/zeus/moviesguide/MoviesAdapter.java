@@ -15,7 +15,14 @@
  */
 package xyz.jc.zeus.moviesguide;
 
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +32,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
+
+import java.io.ByteArrayOutputStream;
+
+import xyz.jc.zeus.moviesguide.data.MovieColumns;
+import xyz.jc.zeus.moviesguide.data.MovieProvider;
 
 /**
  * {@link MoviesAdapter} exposes a list of movie information to a
@@ -37,7 +49,8 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
      */
     private final MoviesAdapterOnClickHandler mClickHandler;
     private String[][] mMoviesData;
-
+    private byte[][] favMoviesPoster;
+    private Context context;
     /**
      * Creates a MoviesAdapter.
      *
@@ -61,12 +74,11 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
      */
     @Override
     public MoviesAdapterViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
-        Context context = viewGroup.getContext();
+        context = viewGroup.getContext();
         int layoutIdForListItem = R.layout.movies_list_item;
         LayoutInflater inflater = LayoutInflater.from(context);
-        boolean shouldAttachToParentImmediately = false;
 
-        View view = inflater.inflate(layoutIdForListItem, viewGroup, shouldAttachToParentImmediately);
+        View view = inflater.inflate(layoutIdForListItem, viewGroup, false);
         return new MoviesAdapterViewHolder(view);
     }
 
@@ -88,8 +100,16 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
         String moviePoster = mMoviesData[position][2];
         moviesAdapterViewHolder.mMovieTitleTextView.setText(movieTitle);
         moviesAdapterViewHolder.mMovieRatingTextView.setText(movieRating);
-        Picasso.with(moviesAdapterViewHolder.itemView.getContext()).load(moviePoster).placeholder(R.drawable.poster_placeholder).into(moviesAdapterViewHolder.mMoviePosterImageView);
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        if (prefs.getString(context.getString(R.string.pref_sort_key), context.getString(R.string.pref_sort_popularity)).equals(context.getString(R.string.pref_sort_favourite))) {
+            Bitmap bm = BitmapFactory.decodeByteArray(favMoviesPoster[position], 0, favMoviesPoster[position].length);
+            moviesAdapterViewHolder.mMoviePosterImageView.setImageBitmap(bm);
+        } else {
+            Picasso.with(moviesAdapterViewHolder.itemView.getContext()).load(moviePoster).placeholder(R.drawable.poster_placeholder).into(moviesAdapterViewHolder.mMoviePosterImageView);
+        }
     }
+
     /**
      * This method simply returns the number of items to display. It is used behind the scenes
      * to help layout our Views and for animations.
@@ -109,8 +129,19 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
      *
      * @param moviesData The new movies data to be displayed.
      */
-    public void setPosterData(String[][] moviesData) {
+    public void setPosterData(String[][] moviesData, Context context) {
         mMoviesData = moviesData;
+        ContentResolver resolver = context.getContentResolver();
+        Cursor cursor = resolver.query(MovieProvider.Movies.CONTENT_URI, null, null, null, null);
+        if (cursor != null && cursor.getCount() > 0) {
+            favMoviesPoster = new byte[cursor.getCount()][];
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                favMoviesPoster[cursor.getPosition()] = cursor.getBlob(cursor.getColumnIndex(MovieColumns.BYTES_MAIN_POSTER));
+                cursor.moveToNext();
+            }
+            cursor.close();
+        }
         notifyDataSetChanged();
     }
 
@@ -118,7 +149,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
      * The interface that receives onClick messages.
      */
     public interface MoviesAdapterOnClickHandler {
-        void onClick(int selectedMovie);
+        void onClick(int selectedMovie, byte[] selectedMoviePoster);
     }
 
     /**
@@ -128,6 +159,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
         public final TextView mMovieTitleTextView;
         public final TextView mMovieRatingTextView;
         public final ImageView mMoviePosterImageView;
+        public byte[] mMoviePosterImageBytes;
 
         public MoviesAdapterViewHolder(View view) {
             super(view);
@@ -145,7 +177,11 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
         @Override
         public void onClick(View v) {
             int adapterPosition = getAdapterPosition();
-            mClickHandler.onClick(adapterPosition);
+            Bitmap bitmap = ((BitmapDrawable) mMoviePosterImageView.getDrawable()).getBitmap();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            mMoviePosterImageBytes = baos.toByteArray();
+            mClickHandler.onClick(adapterPosition, mMoviePosterImageBytes);
         }
     }
 }

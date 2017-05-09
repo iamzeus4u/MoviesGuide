@@ -1,18 +1,24 @@
 package xyz.jc.zeus.moviesguide;
 
+import android.app.Dialog;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 import android.databinding.DataBindingUtil;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.app.ShareCompat;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,7 +29,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.github.paolorotolo.expandableheightlistview.ExpandableHeightListView;
 import com.google.android.youtube.player.YouTubeStandalonePlayer;
@@ -62,7 +67,8 @@ public class DetailActivity extends AppCompatActivity {
     private boolean loadersInitState = false;
     private TextView vtextView;
     private TextView rtextView;
-    private String YOUTUBE_API_KEY = ApiKeys.YOUTUBE_API_KEY;
+    private byte[] selectedMoviePosterBytes;
+    private final String YOUTUBE_API_KEY = ApiKeys.YOUTUBE_API_KEY;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +80,7 @@ public class DetailActivity extends AppCompatActivity {
         if (intentThatStartedThisActivity != null) {
             if (intentThatStartedThisActivity.hasExtra("movie")) {
                 mMovieInfo = intentThatStartedThisActivity.getStringArrayExtra("movie");
+                selectedMoviePosterBytes = intentThatStartedThisActivity.getByteArrayExtra("selectedMoviePosterBytes");
                 mPosterUrlString = mMovieInfo[2].replace("w342", "w780");
                 Context context = this;
                 Picasso.with(context).load(mPosterUrlString).placeholder(R.drawable.poster_placeholder).into(mPoster);
@@ -93,7 +100,6 @@ public class DetailActivity extends AppCompatActivity {
                         if (moviesExInfo != null) {
                             deliverResult(moviesExInfo);
                         } else {
-                            //mLoadingIndicator.setVisibility(View.VISIBLE);
                             forceLoad();
                         }
                     }
@@ -101,7 +107,6 @@ public class DetailActivity extends AppCompatActivity {
                     @Override
                     public List<MovieReview> loadInBackground() {
                         List<MovieReview> reviews = null;
-
                         try {
                             if (!isFAVOURITE(mMovieInfo[0])) {
                                 URL movieReviewRequestUrl = NetworkUtils.buildUrlForDetail(mMovieInfo[0], "reviews");
@@ -119,7 +124,6 @@ public class DetailActivity extends AppCompatActivity {
                                     }
                                     cursor.close();
                                 }
-
                             }
                             return reviews;
                         } catch (Exception e) {
@@ -137,19 +141,16 @@ public class DetailActivity extends AppCompatActivity {
 
             @Override
             public void onLoadFinished(Loader<List<MovieReview>> loader, List<MovieReview> data) {
-                //mLoadingIndicator.setVisibility(View.INVISIBLE);
                 mReviewInfo = data;
                 reviewAdapter = new MovieReviewAdapter(DetailActivity.this, mReviewInfo);
                 reviewListView.setAdapter(reviewAdapter);
 
                 if (data != null & data.size() != 0) {
-                    //showPosterDataView();
-                    rtextView.setText("REVIEWS");
+                    rtextView.setText(String.valueOf(data.size()) + " " + getString(R.string.detail_review_yea));
 
 
                 } else {
-                    //showErrorMessage();
-                    rtextView.setText("NO REVIEWS");
+                    rtextView.setText(getString(R.string.detail_review_non));
 
                 }
             }
@@ -170,7 +171,6 @@ public class DetailActivity extends AppCompatActivity {
                         if (moviesVideoInfo != null) {
                             deliverResult(moviesVideoInfo);
                         } else {
-                            //mLoadingIndicator.setVisibility(View.VISIBLE);
                             forceLoad();
                         }
                     }
@@ -213,20 +213,13 @@ public class DetailActivity extends AppCompatActivity {
 
             @Override
             public void onLoadFinished(Loader<List<MovieVideo>> loader, List<MovieVideo> data) {
-                //mLoadingIndicator.setVisibility(View.INVISIBLE);
                 mVideoInfo = data;
                 videoAdapter = new MovieVideoAdapter(getApplicationContext(), mVideoInfo);
                 videoListView.setAdapter(videoAdapter);
-
                 if (data != null & data.size() != 0) {
-                    //showPosterDataView();
-                    vtextView.setText("VIDEOS");
-
-
+                    vtextView.setText(String.valueOf(data.size()) + " " + getString(R.string.detail_video_title_yeah));
                 } else {
-                    //showErrorMessage();
-                    vtextView.setText("NO VIDEOS");
-
+                    vtextView.setText(getString(R.string.detail_video_title_non));
                 }
             }
 
@@ -259,8 +252,12 @@ public class DetailActivity extends AppCompatActivity {
                     Intent intent = YouTubeStandalonePlayer.createVideosIntent(DetailActivity.this, YOUTUBE_API_KEY, keys, 0, 0, true, true);
                     startActivity(intent);
                 } catch (Exception e) {
-                            /*startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(mVideoInfo.get(position).getURL)));
-                            Log.i("Video", "Video Playing" + mVideoInfo.get(position).getURL);*/
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mVideoInfo.get(0).getURL));
+                    if (intent.resolveActivity(getPackageManager()) != null) {
+                        startActivity(intent);
+                    }
+                    startActivity(intent);
+                    Log.i(LOG_TAG, "Video Playing" + mVideoInfo.get(0).getURL);
                 }
             }
         });
@@ -272,8 +269,12 @@ public class DetailActivity extends AppCompatActivity {
                     Intent intent = YouTubeStandalonePlayer.createVideoIntent(DetailActivity.this, YOUTUBE_API_KEY, mVideoInfo.get(position - 1).getKEY, 0, true, true);
                     startActivity(intent);
                 } catch (Exception e) {
-                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(mVideoInfo.get(position).getURL)));
-                    Log.i("Video", "Video Playing" + mVideoInfo.get(position).getURL);
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mVideoInfo.get(position - 1).getURL));
+                    if (intent.resolveActivity(getPackageManager()) != null) {
+                        startActivity(intent);
+                    }
+                    startActivity(intent);
+                    Log.i(LOG_TAG, "Video " + position + " Playing" + mVideoInfo.get(position - 1).getURL);
                 }
             }
         });
@@ -292,10 +293,12 @@ public class DetailActivity extends AppCompatActivity {
         if (INITIALIZED) {
             getSupportLoaderManager().restartLoader(REVIEW_LOADER_ID, null, reviewResultLoaderListener);
             getSupportLoaderManager().restartLoader(VIDEO_LOADER_ID, null, videoResultLoaderListener);
+            Log.d(LOG_TAG, "Loaders Restarted");
         } else {
             getSupportLoaderManager().initLoader(REVIEW_LOADER_ID, null, reviewResultLoaderListener);
             getSupportLoaderManager().initLoader(VIDEO_LOADER_ID, null, videoResultLoaderListener);
             loadersInitState = true;
+            Log.d(LOG_TAG, "Loaders Inititiated");
         }
     }
 
@@ -336,8 +339,35 @@ public class DetailActivity extends AppCompatActivity {
             case R.id.action_settings:
                 Intent startSettingsActivityIntent = new Intent(this, SettingsActivity.class);
                 startActivity(startSettingsActivityIntent);
+            case R.id.action_share:
+                sharingCreateDialog().show();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public Dialog sharingCreateDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(getString(R.string.detail_sharing_title))
+                .setItems(R.array.sharing_option, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (which == 1) {
+                            StringBuilder videoLinks = new StringBuilder();
+                            for (MovieVideo video : mVideoInfo
+                                    ) {
+                                videoLinks.append(video.getURL).append("\n");
+                            }
+                            ShareCompat.IntentBuilder.from(DetailActivity.this).setChooserTitle(getString(R.string.detail_sharing_youtube)).setText(videoLinks.toString()).setType("text/plain").startChooser();
+                        } else {
+                            StringBuilder reviewLinks = new StringBuilder();
+                            for (MovieReview review : mReviewInfo
+                                    ) {
+                                reviewLinks.append(review.getPATH).append("\n");
+                            }
+                            ShareCompat.IntentBuilder.from(DetailActivity.this).setChooserTitle(getString(R.string.detail_sharing_review)).setText(reviewLinks.toString()).setType("text/plain").startChooser();
+                        }
+                    }
+                });
+        return builder.create();
     }
 
     private boolean onMarkFavorite() {
@@ -350,15 +380,21 @@ public class DetailActivity extends AppCompatActivity {
         mContentValues.put(MovieColumns.USER_RATING, mMovieInfo[5]);
         mContentValues.put(MovieColumns.JSON_REVIEW, jsonMovieReviewResponse);
         mContentValues.put(MovieColumns.JSON_VIDEO, jsonMovieVideoResponse);
+        mContentValues.put(MovieColumns.BYTES_MAIN_POSTER, selectedMoviePosterBytes);
 
         try {
-            Uri uri = getContentResolver().insert(MovieProvider.Movies.CONTENT_URI, mContentValues);
-            if (uri != null) {
-                Toast.makeText(this, uri.toString(), Toast.LENGTH_LONG).show();
-            }
+            getContentResolver().insert(MovieProvider.Movies.CONTENT_URI, mContentValues);
+            Log.i(LOG_TAG, mMovieInfo[1] + " is added to the database");
+            Snackbar.make(findViewById(android.R.id.content), mMovieInfo[1] + " " + getString(R.string.detail_db_added), Snackbar.LENGTH_LONG).setAction(getString(R.string.detail_action_undo), new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onUnMarkFavorite();
+                    fav.setIcon(ContextCompat.getDrawable(DetailActivity.this, R.drawable.ic_action_fav0));
+                }
+            }).setActionTextColor(Color.RED).show();
             return true;
         } catch (SQLiteConstraintException e) {
-            Toast.makeText(this, "Wait for info to laod and try again!", Toast.LENGTH_LONG).show();
+            Snackbar.make(findViewById(android.R.id.content), getString(R.string.detail_db_wait_warning), Snackbar.LENGTH_LONG).show();
             return false;
         }
 
@@ -367,6 +403,14 @@ public class DetailActivity extends AppCompatActivity {
     private boolean onUnMarkFavorite() {
         try {
             getContentResolver().delete(MovieProvider.Movies.withId(mMovieInfo[0]), null, null);
+            Snackbar.make(findViewById(android.R.id.content), mMovieInfo[1] + "" + getString(R.string.detail_db_deleted), Snackbar.LENGTH_LONG).setAction(getString(R.string.detail_action_undo), new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onMarkFavorite();
+                    fav.setIcon(ContextCompat.getDrawable(DetailActivity.this, R.drawable.ic_action_fav1));
+                }
+            }).setActionTextColor(Color.GREEN).show();
+            Log.i(LOG_TAG, mMovieInfo[1] + " is deleted from the database");
             return true;
         } catch (Exception e) {
             return false;

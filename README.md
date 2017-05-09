@@ -6,8 +6,10 @@ This is very basic for a beginner Android developer. It just simply making HTTP 
 
 # Prerequisites
 * Published with Android Studio 2.3.1
-* Get your API key from [MovieDb] (https://developers.themoviedb.org/3/getting-started)
-* Insert API key [here] (https://github.com/iamzeus4u/MoviesGuide/blob/master/app/src/main/java/xyz/jc/zeus/moviesguide/utilities/NetworkUtils.java) @ line 37
+* Get your Moviedb API key from [MovieDb] (https://developers.themoviedb.org/3/getting-started)
+* Insert API key [here] (https://github.com/iamzeus4u/MoviesGuide/blob/master/app/src/main/java/xyz/jc/zeus/moviesguide/utilities/NetworkUtils.java) @ line 39
+* Get your YoutubePlayer API key from [Youtube] (https://developers.google.com/youtube/android/player/)
+* Insert API key [here] (https://github.com/iamzeus4u/MoviesGuide/blob/master/app/src/main/java/xyz/jc/zeus/moviesguide/DetailActivity.java) @ line 71
 
 # Author
 Nweze Valentine Obi
@@ -19,11 +21,11 @@ Nweze Valentine Obi
 ## Most Rated
 ![Most Rated](/screenshots/Sorted%20by%20user%20rating.png)
 
-## Sorting Option
-![Sorting Option](/screenshots/sorting%20choice%20dialog.png)
+## Detail Page Review
+![Detail Page](/screenshots/Detail%20Page%20Review.png)
 
-## Detail Page
-![Detail Page](/screenshots/Detail%20Page.png)
+## Detail Page Landscape
+![Detail Page](/screenshots/Detail%20Page%20Landscape.png)
 
-
-
+## Video Play Page
+![Detail Page](/screenshots/Video%20Play%20Page.png)
