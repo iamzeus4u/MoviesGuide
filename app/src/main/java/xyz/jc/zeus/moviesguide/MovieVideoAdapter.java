@@ -27,12 +27,10 @@ public class MovieVideoAdapter extends ArrayAdapter<MovieVideo> implements YouTu
 
     @Override
     public void onInitializationSuccess(YouTubeThumbnailView youTubeThumbnailView, final YouTubeThumbnailLoader youTubeThumbnailLoader) {
-
     }
 
     @Override
     public void onInitializationFailure(YouTubeThumbnailView youTubeThumbnailView, YouTubeInitializationResult youTubeInitializationResult) {
-
     }
 
     private static class ViewHolder {
@@ -63,8 +61,6 @@ public class MovieVideoAdapter extends ArrayAdapter<MovieVideo> implements YouTu
             viewHolder.imageView = (ImageView) convertView.findViewById(R.id.video_imageview);
             Picasso.with(getContext()).load(THUMBNAIL_BASE_URL + videos.getKEY + THUMBNAIL_END_URL).placeholder(R.drawable.loading).into(viewHolder.imageView);
             Log.d(TAG, THUMBNAIL_BASE_URL + videos.getKEY + THUMBNAIL_END_URL);
-
-
             // Cache the viewHolder object inside the fresh view
             convertView.setTag(viewHolder);
         } else {

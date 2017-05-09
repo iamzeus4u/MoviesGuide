@@ -22,10 +22,10 @@
     <string name="toast_favourite">Displaying Favourites</string>
 
     <string name="user_rating">User Rating:\u0020</string>
-
-    <string name="pick_sort">Sort By</string>
-    <string name="pick_popular">popular</string>
-    <string name="pick_rated">top_rated</string>
+    <!--
+        <string name="pick_sort">Sort By</string>
+        <string name="pick_popular" translatable="false">popular</string>
+        <string name="pick_rated" translatable="false">top_rated</string>-->
 
     <string name="pref_sort_label">Sort Option</string>
     <string name="pref_sort_key" translatable="false">sort</string>
@@ -40,5 +40,16 @@
 
     <string name="reviewed_by">Reviewed by\u0020</string>
     <string name="watch_video">Watch video on\u0020</string>
+    <string name="detail_video_title_non">NO VIDEO AVAILABLE</string>
+    <string name="detail_video_title_yeah">VIDEOS: tap here to play all</string>
+    <string name="detail_sharing_title">What do you want to share?</string>
+    <string name="detail_sharing_youtube">Sharing YouTube Video Link</string>
+    <string name="detail_sharing_review">Sharing Reviews Link</string>
+    <string name="detail_action_undo">UNDO</string>
+    <string name="detail_db_added">is added to the database</string>
+    <string name="detail_db_deleted">is deleted from the database</string>
+    <string name="detail_db_wait_warning">Wait for info to laod and try again!</string>
+    <string name="detail_review_non">NO REVIEWS AVAILABLE</string>
+    <string name="detail_review_yea">REVIEWS</string>
 
 </resources>

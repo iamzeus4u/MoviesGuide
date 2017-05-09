@@ -5,6 +5,7 @@ import net.simonvt.schematic.annotation.DataType;
 import net.simonvt.schematic.annotation.NotNull;
 import net.simonvt.schematic.annotation.PrimaryKey;
 
+import static net.simonvt.schematic.annotation.DataType.Type.BLOB;
 import static net.simonvt.schematic.annotation.DataType.Type.INTEGER;
 import static net.simonvt.schematic.annotation.DataType.Type.TEXT;
 
@@ -14,15 +15,6 @@ import static net.simonvt.schematic.annotation.DataType.Type.TEXT;
 
 
 public interface MovieColumns {
-
-    /* String array to hold each movie information String
-        * id = 0
-        * original_title = 1
-        * poster_path = 2
-        * overview = 3
-        * release_date = 4
-        * vote_average = 5
-        * */
     @DataType(INTEGER)
     @PrimaryKey
     @AutoIncrement
@@ -51,4 +43,7 @@ public interface MovieColumns {
     @DataType(TEXT)
     @NotNull
     String JSON_VIDEO = "jSONvideo";
+    @DataType(BLOB)
+    @NotNull
+    String BYTES_MAIN_POSTER = "MainPosterBytes";
 }
