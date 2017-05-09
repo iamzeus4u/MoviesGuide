@@ -27,5 +27,8 @@ Nweze Valentine Obi
 ## Detail Page Landscape
 ![Detail Page](/screenshots/Detail%20Page%20Landscape.png)
 
+## Detail Page Trailer
+![Detail Page](/screenshots/Detail%20Page%20Trailers.png)
+
 ## Video Play Page
 ![Detail Page](/screenshots/Video%20Play%20Page.png)
